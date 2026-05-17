@@ -70,6 +70,8 @@ public class CartController {
 		IntStream.range(0, request.getQuantity())
 			.forEach(i -> cart.removeItem(item.get()));
 		log.info("Cart updated and removed item with item ID:{}",request.getItemId());
+
+		//need to set up another exception here to not allow any removals if the cart is empty
 		cartRepository.save(cart);
 		return ResponseEntity.ok(cart);
 	}
