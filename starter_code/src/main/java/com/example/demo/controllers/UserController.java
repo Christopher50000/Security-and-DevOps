@@ -29,6 +29,13 @@ public class UserController {
 
 	@GetMapping("/id/{id}")
 	public ResponseEntity<User> findById(@PathVariable Long id) {
+		User user = userRepository.findById(id).orElse(null);
+		if (user == null){
+			log.info("User found with id: {}", id);
+		}
+		else {
+			log.error("User not found with id: {}", id);
+		}
 		log.info("User found with id: {}", id);
 		return ResponseEntity.of(userRepository.findById(id));
 	}
@@ -36,7 +43,12 @@ public class UserController {
 	@GetMapping("/{username}")
 	public ResponseEntity<User> findByUserName(@PathVariable String username) {
 		User user = userRepository.findByUsername(username);
-		log.info("User found with username: {}", username);
+		if (user!=null){
+			log.info("User found with username: {}", username);
+		}
+		else {
+			log.error("User not found with username: {}", username);
+		}
 		return user == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(user);
 	}
 	
