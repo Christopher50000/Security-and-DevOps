@@ -1,0 +1,111 @@
+### =========================
+### LOGIN (LOCAL)
+### =========================
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "username": "Chris",
+  "password": "TEST123"
+}
+
+###
+
+### LOGIN (EC2)
+POST http://ec2publicaddress:8081/MyApp/login
+Content-Type: application/json
+
+{
+  "username": "Chris",
+  "password": "TEST123"
+}
+
+###
+
+### =========================
+### USER
+### =========================
+
+### Create User (LOCAL)
+POST http://localhost:8080/api/user/create
+Content-Type: application/json
+
+{
+  "username": "Chris",
+  "password": "TEST123",
+  "confirmPassword": "TEST123"
+}
+
+###
+
+### Get User by Username (LOCAL)
+GET http://localhost:8080/api/user/Chris
+
+###
+
+### Get User by ID (EC2)
+GET http://ec2publicaddress:8081/MyApp/api/user/id/1
+
+###
+
+### =========================
+### ITEM
+### =========================
+
+### Get Item by ID
+GET http://ec2publicaddress:8081/MyApp/api/item/1
+
+###
+
+### Get Item by Name
+GET http://ec2publicaddress:8081/MyApp/api/item/name/Square%20Widget
+
+###
+
+### =========================
+### CART
+### =========================
+
+### Add to Cart (EC2)
+POST http://ec2publicaddress:8081/MyApp/api/cart/addToCart
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "username": "Chris",
+  "itemId": 2,
+  "quantity": 5
+}
+
+###
+
+### Remove from Cart (EC2)
+POST http://ec2publicaddress:8081/MyApp/api/cart/removeFromCart
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "username": "Chris",
+  "itemId": 2,
+  "quantity": 3
+}
+
+###
+
+### =========================
+### ORDER
+### =========================
+
+### Submit Order (LOCAL)
+POST http://localhost:8080/api/order/submit/Chris
+
+###
+
+### Submit Order (EC2)
+POST http://ec2publicaddress:8081/MyApp/api/order/submit/Chris
+
+###
+
+### Order History (EC2)
+GET http://ec2publicaddress:8081/MyApp/api/order/history/Chris
+Authorization: Bearer <TOKEN>

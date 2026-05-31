@@ -1,80 +1,146 @@
-# eCommerce Application
+# eCommerce Application (Spring Boot Security & DevOps Project)
 
-In this project, you'll have an opportunity to demonstrate the security and DevOps skills that you learned in this lesson by completing an eCommerce application. You'll start with a template for the complete application, and your goal will be to take this template and add proper authentication and authorization controls so users can only access their data, and that data can only be accessed in a secure way. 
+## Overview
+This project is a Java-based eCommerce backend built with **Spring Boot**, **Hibernate ORM**, and an **H2 in-memory database**. The main focus of this project is implementing secure authentication and authorization so users can only access their own data using **JWT-based security**.
 
-## Project Template
-First, you'll want to get set up with the template. The template is written in Java using Spring Boot, Hibernate ORM, and the H2 database. H2 is an in memory database, so if you need to retry something, every application startup is a fresh copy.
+It also demonstrates backend development and DevOps skills including CI/CD concepts, API testing, cloud deployment practices, and secure application design.
 
-To use the template, import it in the IDE of your choice as a Spring Boot application. Where required, this readme assumes the eclipse IDE.
+---
 
-Once the project is set up, you will see 5 packages:
+## Tech Stack
+- Java
+- Spring Boot
+- Spring Security
+- Hibernate / JPA
+- H2 Database
+- JSON Web Tokens (JWT)
+- Maven
 
-* demo - this package contains the main method which runs the application
+---
 
-* model.persistence - this package contains the data models that Hibernate persists to H2. There are 4 models: Cart, for holding a User's items; Item , for defining new items; User, to hold user account information; and UserOrder, to hold information about submitted orders. Looking back at the application “demo” class, you'll see the `@EntityScan` annotation, telling Spring that this package contains our data models
+## Project Structure
 
-* model.persistence.repositories - these contain a `JpaRepository` interface for each of our models. This allows Hibernate to connect them with our database so we can access data in the code, as well as define certain convenience methods. Look through them and see the methods that have been declared. Looking at the application “demo” class, you’ll see the `@EnableJpaRepositories` annotation, telling Spring that this package contains our data repositories.
+### `model.persistence`
+Contains JPA entity models persisted in the database:
+- Cart – stores user cart items
+- Item – defines store items
+- User – stores user account information
+- UserOrder – stores submitted orders
 
-* model.requests - this package contains the request models. The request models will be transformed by Jackson from JSON to these models as requests are made. Note the `Json` annotations, telling Jackson to include and ignore certain fields of the requests. You can also see these annotations on the models themselves.
+### `model.persistence.repositories`
+JPA repositories used to interact with the database and perform CRUD operations.
 
-* controllers - these contain the api endpoints for our app, 1 per model. Note they all have the `@RestController` annotation to allow Spring to understand that they are a part of a REST API
+### `model.requests`
+Request/DTO models used for API input handling and JSON mapping.
 
-In resources, you'll see the application configuration that sets up our database and Hibernate, It also contains a data.sql file with a couple of items to populate the database with. Spring will run this file every time the application starts
+### `controllers`
+REST API endpoints for the application. Each model has its own controller.
 
-In eclipse, you can right click the project and click  “run as” and select Spring Boot application. The application should tell you it’s starting in the console view. Once started, using a REST client, such as Postman, explore the APIs.
+### `resources`
+- `application.properties` – database and Hibernate configuration
+- `data.sql` – seed data loaded at application startup
+- `api-requests.http` – API testing for local and EC2 file
+---
 
-Some examples are as below:
-To create a new user for example, you would send a POST request to:
-http://localhost:8080/api/user/create with an example body like 
+## Running the Application
 
-```
+1. Import the project into your IDE (Eclipse or IntelliJ recommended)
+2. Run the Spring Boot application:
+   - Right-click project → Run As → Spring Boot Application
+3. The application will start at:
+   - http://localhost:8080
+4. Use a REST client (such as Postman) to test endpoints.
+
+---
+
+## API Example
+
+### Create User
+
+**POST**
+-- http://localhost:8080/api/user/create
+
+
+#### Request Body
+```json
 {
-    "username": "test"
+  "username" : "Person",
+  "password" :"TEST123",
+  "confirmPassword":"TEST123"
 }
 ```
 
+#### Response
 
-and this would return
-```
+```json
 {
-    "id" 1,
-    "username": "test"
+"id": 1,
+"username": "Christ"
 }
 ```
 
+## Spring Security Implementation 
 
-Exercise:
-Once you've created a user, try  to add items to cart (see the `ModifyCartRequest` class) and submit an order. 
+### Overview
 
-## Adding Authentication and Authorization
-We need to add proper authentication and authorization controls so users can only access their data, and that data can only be accessed in a secure way. We will do this using a combination of usernames and passwords for authentication, as well as JSON Web Tokens (JWT) to handle the authorization.
+- Use of JWT : Login -> Get Token -> User submits another request with token -> Spring Security validates token -> token is valid -> User has access to requested resource
 
-As stated prior, we will implement a password based authentication scheme. To do this, we need to store the users' passwords in a secure way. This needs to be done with hashing, and it's this hash which should be stored. Additionally when viewing their user information, the user's hash should not be returned to them in the response, You should also add some requirements and validation, as well as a confirm field in the request, to make sure they didn't make a typo. 
+## Spring Security Jwt Flow Process
 
-1. Add spring security dependencies: 
-   * Spring-boot-starter-security
-1. JWT does not ship as a part of spring security, so you will have to add the 
-   * java-jwt dependency to your project. 
-1. Spring Boot ships with an automatically configured security module that must be disabled, as we will be implementing our own. This must be done in the Application class.
-2. Create password for the user
-3. Once that is disabled, you will need to implement 4 classes (at minimum, you can break it down however you like):
-   * a subclass of `UsernamePasswordAuthenticationFilter` for taking the username and password from a login request and logging in. This, upon successful authentication, should hand back a valid JWT in the `Authorization` header
-   * a subclass of `BasicAuthenticationFilter`. 
-   * an implementation of the `UserDetailsService` interface. This should take a username and return a userdetails User instance with the user's username and hashed password.
-   *  a subclass of `WebSecurityConfigurerAdapter`. This should attach your user details service implementation to Spring's `AuthenticationManager`. It also handles session management and what endpoints are secured. For us, we manage the session so session management should be disabled. Your filters should be added to the authentication chain and every endpoint but 1 should have security required. The one that should not is the one responsible for creating new users.
+### 1. Security Config Class ("The Rulebook on how spring security behaves")
+
+- Connects everything together
+- Tells Spring Security which endpoints are public (like /login, /createUser)
+- Tells Spring Security which endpoints require authentication
+- Disables default session login (because JWT is stateless)
+- Registers authentication filter
+- Registers authorization filter
+- Attaches UserDetailsService to authentication system
+
+### 2. Login Step (Authentication Filter)
+   
+  - Extends `UsernamePasswordAuthenticationFilter`
+  - Runs only when `/login` endpoint is hit
+#### What is does (basically “Who are you? Prove it. OK here’s your token.”)
+
+- Reads username + password from the login request
+- Checks if credentials are correct
+- If valid → creates a JWT token
+- Sends JWT back to the client (usually in Authorization header)
+
+### 3. Every Request Step (Authorization Filter)
+
+- Extends BasicAuthenticationFilter
+- Runs on EVERY request after login
+
+#### What it does (basically “Is this request allowed? OK here’s your token.”)
+
+- Reads JWT from Authorization header
+- Verifies JWT is valid
+- If valid → allows request to proceed
+- If invalid → denies request
+
+### 4. Look up User (UserDetailsService)
+
+#### What it does (basically loads user from db from using username)
+
+- Loads user from database using username
+- Returns a Spring Security UserDetails object which contains
+  - username
+  - hashed passwords
+  - authorities
+- this matters since Spring Security needs to compare the password against the stored hashed password
 
 
-Once all this is setup, you can use Spring's default /login endpoint to login like so
 
-```
-POST /login 
-{
-    "username": "test",
-    "password": "somepassword"
-}
-```
+## Learning Outcomes
+- Built RESTful APIs using Spring Boot
+- Implemented secure authentication and authorization using JWT
+- Applied CI/CD practices using Jenkins pipelines
+- Deployed applications on AWS EC2 instances
+- Created and managed Docker containers (Tomcat and Jenkins)
+- Gained hands-on experience with containerized deployment workflows
 
-and that should, if those are valid credentials, return a 200 OK with an Authorization header which looks like "Bearer <data>" this "Bearer <data>" is a JWT and must be sent as a Authorization header for all other rqeuests. If it's not present, endpoints should return 401 Unauthorized. If it's present and valid, the endpoints should function as normal.
-
-## Testing
-You must implement unit tests demonstrating at least 80% code coverage.
+## Acknowledgements
+This project was built as part of the Java Web Developer Nanodegree program from Udacity.  
+Special thanks to Udacity for providing structured learning and hands-on backend development experience.
