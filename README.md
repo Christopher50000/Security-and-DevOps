@@ -139,6 +139,7 @@ REST API endpoints for the application. Each model has its own controller.
 - Applied CI/CD practices using Jenkins pipelines
 - Deployed applications on AWS EC2 instances
 - Created and managed Docker containers (Tomcat and Jenkins)
+- Created a Splunk dashboard and configured alerts for an EC2 instance.
 - Gained hands-on experience with containerized deployment workflows
 
 ## Acknowledgements
